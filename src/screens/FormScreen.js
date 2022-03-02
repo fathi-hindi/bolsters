@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Image, View, Platform } from "react-native";
+import { Button, Image, View, Platform, StyleSheet, Dimensions } from "react-native";
 import {
   Layout,
   TopNav,
@@ -8,14 +8,27 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { Form, FormItem } from 'react-native-form-component';
 import { IconButton, Colors } from 'react-native-paper';
+import { MapView, Marker } from 'react-native-maps';
 
 export default function ({ navigation }) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [subject, setSubject] = useState("");
   const [note, setNote] = useState("");
+  const [region , setRegion] = useState({});
 
   const [images, setImages] = useState([]);
+
+  const getInitialState = () =>  {
+    return {
+      region: {
+        latitude: 32.2227,
+        longitude: 35.2621,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      },
+    };
+  }
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -72,9 +85,24 @@ export default function ({ navigation }) {
             value={address}
             onChangeText={(address) => setAddress(address)}
           />
+          <View style={styles.mapContainer}>
+            <MapView
+              style={styles.map}
+              initialRegion={getInitialState()}
+              region={region}
+              onRegionChange={(region) => setRegion(region)}
+            >
+              <Marker
+                key='MARKER_1'
+                coordinate={{ latitude : region ? region.latitude : 0, longitude : region ? region.longitude : 0 }}
+                title="test"
+                description="test desc"
+              />
+            </MapView>
+          </View>
           <FormItem
             label="الموضوع"
-            labelStyle={{textAlign: 'right', width: '100%'}}
+            labelStyle={{textAlign: 'right', width: '100%', marginTop: 20}}
             textInputStyle={{textAlign: 'right'}}
             value={subject}
             onChangeText={(subject) => setSubject(subject)}
@@ -107,3 +135,15 @@ export default function ({ navigation }) {
     </Layout>
   );
 }
+
+const styles = StyleSheet.create({
+  mapContainer: {
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  map: {
+    width: Dimensions.get('window').width - 40,
+    height: 150,
+  },
+});
